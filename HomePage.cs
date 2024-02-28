@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ecommerce.Models;
 using ecommerce.Dtos;
+using Microsoft.AspNetCore.Http;
 
 namespace Ecommerce.Test
 {
@@ -18,11 +19,27 @@ namespace Ecommerce.Test
                 .UseInMemoryDatabase(databaseName: "TestDatabase")
                 .Options;
 
-            SeedInMemoryDatabase();
-
             var dbContext = new AppDbContext(_options);
             _Context = dbContext;
-            _controller = new ecommerce.Controllers.Users.ProductController(dbContext);
+
+            SeedInMemoryDatabase();
+
+            var httpContext = new DefaultHttpContext
+            {
+                Request =
+                {
+                    Scheme = "http",
+                    Host = new HostString("example.com")
+                }
+            };
+
+            _controller = new ecommerce.Controllers.Users.ProductController(dbContext)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = httpContext
+                }
+            };
         }
 
         [Fact]
@@ -63,20 +80,17 @@ namespace Ecommerce.Test
 
         private void SeedInMemoryDatabase()
         {
-            using (var context = new AppDbContext(_options))
+            var category = new Category { Name = "Category 1" };
+            _Context.Categories.Add(category);
+            _Context.Products.Add(new Product
             {
-                var category = new Category { Name = "Category 1" };
-                context.Categories.Add(category);
-                context.Products.Add(new Product
-                {
-                    Name = "Product 1",
-                    Price = 10.0m,
-                    Description = "Product 1 Description",
-                    SmallDescription = "Small description of Product 1",
-                    Category = category
-                });
-                context.SaveChanges();
-            }
+                Name = "Product 1",
+                Price = 10.0m,
+                Description = "Product 1 Description",
+                SmallDescription = "Small description of Product 1",
+                Category = category
+            });
+            _Context.SaveChanges();
         }
     }
 }
