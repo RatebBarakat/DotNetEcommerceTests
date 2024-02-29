@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using ecommerce.Models;
 using ecommerce.Dtos;
 using Microsoft.AspNetCore.Http;
+using Moq;
+using ecommerce.Interfaces;
 
 namespace Ecommerce.Test
 {
@@ -33,7 +35,12 @@ namespace Ecommerce.Test
                 }
             };
 
-            _controller = new ecommerce.Controllers.Users.ProductController(dbContext)
+            var mockCache = new Mock<IRedis>();
+            mockCache.Setup(m => m.GetCachedDataAsync<string>("HomePageRandomCategories")).Returns(() => _Context.Categories.ToList());
+
+            mockCache.Setup(m => m.GetCachedDataAsync<string>("categories")).Returns(() => _Context.Categories.ToList());
+
+            _controller = new ecommerce.Controllers.Users.ProductController(dbContext, mockCache.Object)
             {
                 ControllerContext = new ControllerContext
                 {

@@ -145,6 +145,14 @@
               "target": "Package",
               "version": "[11.9.0, )"
             },
+            "Google.Apis.Auth": {
+              "target": "Package",
+              "version": "[1.67.0, )"
+            },
+            "Hangfire": {
+              "target": "Package",
+              "version": "[1.8.11, )"
+            },
             "MailKit": {
               "target": "Package",
               "version": "[4.3.0, )"
